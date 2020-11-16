@@ -1,0 +1,153 @@
+#!/bin/python
+import csv
+import os
+import subprocess
+from datetime import datetime
+class color:
+   PURPLE = ‘\033[95m’
+   CYAN = ‘\033[96m’
+   DARKCYAN = ‘\033[36m’
+   BLUE = ‘\033[94m’
+   GREEN = ‘\033[92m’
+   YELLOW = ‘\033[93m’
+   RED = ‘\033[91m’
+   BOLD = ‘\033[1m’
+   UNDERLINE = ‘\033[4m’
+   GREY = ‘\033[90m’
+   WHITE = ‘\033[97m’
+   END = ‘\033[0m’
+   HRED=‘<p style=“font-family:verdana;color:red;“>‘;
+   HBLU=‘<p style=“font-family:verdana;color:blue;“>‘;
+   HGRN=‘<p style=“font-family:verdana;color:green;“>‘;
+   HRCOL=‘</p>’
+def compute_csv_reader_hname():
+    csv_file=‘/home/mkumarp/csvs/oci_compute_instance.csv’
+    compute_dict={}
+    with open(csv_file,‘r’) as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            compute_dict[row[‘Hostname’]]=row
+    return compute_dict
+def compute_csv_reader_displayname():
+    csv_file=‘/home/mkumarp/csvs/oci_compute_instance.csv’
+    compute_dict={}
+    with open(csv_file,‘r’) as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            compute_dict[row[‘DisplayName’]]=row
+    return compute_dict
+def tenancy_ocid_reader():
+    csv_file=‘/home/mkumarp/csvs/oci_tenancy_ocids.csv’
+    tenancy_dict={}
+    with open(csv_file,‘r’) as csv_file:
+        reader = csv.DictReader(csv_file)
+        for row in reader:
+            tenancy_dict[row[‘Tenancy’]]=row
+    return tenancy_dict
+def fetch_fqdn(server):
+    current_dir=os.getcwd()
+    os.chdir(‘/srv/os_mgmt/inventory’)
+    command=‘ls | grep -vi vars | xargs grep  {}‘.format(server)
+    proc = subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    output = proc.communicate()
+    if len(output) == 2:
+        server_fqdn=output[0].split(‘:’)[1]
+    server_fqdn.replace(‘-pub’,‘’)
+    return server_fqdn
+def parse_ipaddr(ip_addr):
+    command=‘grep -i {} /home/mkumarp/csvs/oci_compute_instance.csv ‘.format(ip_addr)
+    proc = subprocess.Popen(command,shell=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    output = proc.communicate()
+    if len(output) == 2:
+        hname=output[0].split(‘,’)[6]
+        return hname
+def display_outage(hname):
+    host_info=host_inventory[hname]
+    customer_name=host_info.get(‘CustomerName’)
+    environment=host_info.get(‘defined_tags_OMCS_TIER’)
+    server_name=host_info.get(‘DisplayName’)
+    instance_ocid=host_info.get(‘Instance_OCID’)
+    hostname=fetch_fqdn(hname).split()[0].replace(‘-pub’,‘’)
+    private_ip=host_info.get(‘PrivateIP’)
+    public_ip=host_info.get(‘PublicIP’)
+    tenancy=host_info.get(‘Tenancy’)
+    tenancy_ocid=tenancy_details.get(tenancy).get(‘Tenancy_OCID’)
+    dbsystem_ocid=host_info.get(‘DBSystemOCID’)
+    compartment=host_info.get(‘Compartment’)
+    region=host_info.get(‘Region’)
+    oci_availability_domain=host_info.get(‘AD’)
+    if host_info.get(‘DBSystemOCID’) == ‘NotApplicable’:
+        # Its a compute node - send compute details
+        print “”"
+                    Customer               : {}
+                    Environment            : {}
+                    Category               : OCI
+                    Server name            : {}
+                    Server OCID            : {}
+                    Hostname               : {}
+                    Private IP             : {}
+                    Public IP              : {}
+                    Tenancy                : {}
+                    Tenancy OCID           : {}
+                    Compartment            : {}
+                    Region                 : {}
+                    AvailabilityDomain   : {}
+                    Issue Start Time(UTC): {}
+                    Issue End Time (UTC) : {}
+                    EM Incident ID       :
+                    Problem Description  :
+                    Analysis             :
+                    Action Performed     :
+                    GNC SR               :
+                    JIRA Ticket          :
+                    “”".format(customer_name,environment,server_name,instance_ocid,hostname,private_ip,public_ip,tenancy,tenancy_ocid,compartment,region,oci_availability_domain,now.strftime(“%b %d,%Y xx:xx:xx XM”),now.strftime(“%b %d,%Y xx:xx:xx XM”))
+    else:
+                print “”"
+                    Customer               : {}
+                    Environment            : {}
+                    Category               : OCI
+                    DB System Name         : {}
+                    DB System OCID         : {}
+                    DB Node Name           : {}
+                    DB node OCID           : {}
+                    Hostname               : {}
+                    Private IP             : {}
+                    Public IP              : {}
+                    Tenancy                : {}
+                    Tenancy OCID           : {}
+                    Compartment            : {}
+                    Region                 : {}
+                    AvailabilityDomain   : {}
+                    Issue Start Time(UTC): {}
+                    Issue End Time (UTC) : {}
+                    EM Incident ID       :
+                    Problem Description  :
+                    Analysis             :
+                    Action Performed     :
+                    GNC SR               :
+                    JIRA Ticket          :
+                    “”".format(customer_name,environment,server_name,dbsystem_ocid,hname,instance_ocid,hostname,private_ip,public_ip,tenancy,tenancy_ocid,compartment,region,oci_availability_domain,now.strftime(“%b %d,%Y xx:xx:xx XM”),now.strftime(“%b %d,%Y xx:xx:xx XM”))
+if _name_ == ‘_main_‘:
+    host_inventory=compute_csv_reader_hname()
+    display_inventory=compute_csv_reader_displayname()
+    tenancy_details=tenancy_ocid_reader()
+    now = datetime.now()
+    while True:
+        hname=raw_input(“\t” +color.DARKCYAN+‘Enter the host name / ip address- ctrl-c to exit:‘+ color.END )
+        if ‘.com’ in hname:
+            # Lets split the host name and get only the first bit
+            hname=hname.split(‘.’)[0].replace(‘-pub’,‘’)
+        try:
+            host_info=host_inventory[hname]
+            display_outage(hname)
+        except KeyError as e:
+            # Lets validate if user has passed the display name
+            try:
+                details=display_inventory[hname]
+                hname=display_inventory[hname][‘Hostname’]
+                display_outage(hname)
+            except KeyError as e:
+                if hname.split(‘.’)[0].isalnum():
+                    # Looks like the input is an ip address. Let’s try to parse it
+                    hname=parse_ipaddr(hname)
+                    display_outage(hname)

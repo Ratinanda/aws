@@ -1,0 +1,24 @@
+import random
+SUITS = "♠ ♡ ♢ ♣".split()
+RANKS = "2 3 4 5 6 7 8 9 10 J Q K A".split()
+
+def create_deck(shuffle=False):
+    deck=[(s,r) for r in RANKS for s in SUITS]
+    if shuffle:
+        random.shuffle(deck)
+    return(deck)
+
+def deal_hands(deck):
+    return (deck[0::4], deck[1::4], deck[2::4], deck[3::4])
+def play():
+    deck = create_deck(shuffle=True)
+    names = "Bapa Ansool Rati Pinky".split()
+    random.shuffle(names)
+    hands = {n: h for n, h in zip(names, deal_hands(deck))}
+    for name, cards in hands.items():
+        card_str = " ".join(f"{s}{r}" for (s, r) in cards)
+        print(f"{name}: {card_str}")
+
+
+if __name__ == "__main__":
+    play()

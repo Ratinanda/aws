@@ -1,0 +1,4 @@
+name	age
+Ansool	7
+Rati	39
+Suvadra	36
