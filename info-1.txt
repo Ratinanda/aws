@@ -1,0 +1,31 @@
+Valid Token	MG3orOl~5?QuoDo
+Status	success
+Active Date	04-NOV-20
+Active Token	MG3orOl~5?QuoDo
+
+mco shell 'ls -ltrh /*/applcsf/security/pm-*.dat ' --nodes=exalogic_vm --dt=30 --timeout=30 --batch=30 --batch-sleep=30 -v |tee -a /tmp/exalogic_vm.out
+
+
+
+ ls -ltrh /*/applcsf/security/pm-*.dat
+ ls -ltrh /deoa3i/applcsf/security/pm-deoa3i.dat
+
+It is OMCS OCI instance and managed by Oracle.
+We are looking for your help to create as below location and mount it on db and app server. Also this value needs to be updated in context file. Refer 3-B2A73B6 for action plan.
+
+VTVCEBST16
+
+ /u01/app/oracle/appltmp/PEBST16
+
+VTVCEBST15
+
+/u01/app/oracle/appltmp/PEBST15
+
+VTVCEBSD10
+
+/u01/app/oracle/appltmp/PEBSD10
+
+This is required on DB and application servers. No need to mount on EBS cloud Manager
+
+Please refer 3-24395355551 for more details---raised for VTVCEBST10.
+

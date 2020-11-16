@@ -1,0 +1,7 @@
+---
+- name: running the play
+  hosts: all
+  tasks: checking file system
+    - name: finding file system
+      command: cat /etc/motd
+      

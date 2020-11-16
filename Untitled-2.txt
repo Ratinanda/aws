@@ -1,0 +1,14 @@
+<html>
+<H1> WELCOME TO ANSOOL'S GARDEN </H1>
+<body>
+<h1> Coding is easy</h1>
+<h2>Addition</h2>
+<form action="/action_page.php">
+  <label for="fnum">First Number:</label>
+  <input type="text" id="fnum" name="fnum"><br><br>
+  <label for="Snum">Second Number:</label>
+  <input type="text" id="Snum" name="Snum"><br><br>
+  <input type="submit" value="Submit">
+</form>
+</body>
+</html>
